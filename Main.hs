@@ -51,14 +51,14 @@ prependHash s | T.isPrefixOf "#" s = s
 logEventsHandler :: EventHandler
 logEventsHandler = EventHandler "Trace chat events" EEverything logEvent 
 
-messageHandler :: EventHandler
-messageHandler = EventHandler "Log messages" EPrivmsg logMessage
-
-
 logEvent :: UnicodeEvent -> IRC ()
 logEvent ev = do
     liftIO . print $ ev
     liftIO . print . eventType $ ev
+
+messageHandler :: EventHandler
+messageHandler = EventHandler "Log messages" EPrivmsg logMessage
+
 
 -- default event handlers
 -- https://hackage.haskell.org/package/irc-client-0.2.4.0/docs/src/Network-IRC-Client-Handlers.html#defaultEventHandlers
@@ -120,4 +120,10 @@ run host port nick = do
   let cfg = defaultIRCConf nick
   let cfg' = cfg { _handlers = yourCustomEventHandlers : _handlers cfg }
   start conn cfg'
+
+
+Messages
+
+  http://hackage.haskell.org/package/irc-conduit-0.1.2.0/docs/src/Network-IRC-Conduit-Internal-Messages.html#Message
+
 -}
