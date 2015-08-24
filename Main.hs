@@ -30,7 +30,9 @@ main = do
   let port = 6667
   conn <- connect' stdoutLogger host port 1
   let cfg = defaultIRCConf nickname
-  let cfg' = cfg { _eventHandlers = [joinChatHandler chatroom, logEventsHandler] ++ _eventHandlers cfg }
+  let hs = [joinChatHandler chatroom]
+  -- let hs = [joinChatHandler chatroom, logEventsHandler]
+  let cfg' = cfg { _eventHandlers = hs ++ _eventHandlers cfg }
   start conn cfg'
 
 logEventsHandler :: EventHandler
