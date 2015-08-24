@@ -17,8 +17,8 @@ data Options = Options {
 
 parseOpts :: Parser Options
 parseOpts = Options   
-        <$> (T.pack <$> strArgument (metavar "NICK" <> help "nickname"))
-        <*> (T.pack <$> strArgument (metavar "CHANNEL"))
+        <$> (T.pack <$> strArgument (metavar "NICK" <> help "Nickname"))
+        <*> (prependHash . T.pack <$> strArgument (metavar "CHANNEL" <> help "Channel, # is automatically prepended if missing"))
 
 opts = info (helper <*> parseOpts)
          (fullDesc <> header "bhirc")
@@ -34,6 +34,11 @@ main = do
   -- let hs = [joinChatHandler chatroom, logEventsHandler]
   let cfg' = cfg { _eventHandlers = hs ++ _eventHandlers cfg }
   start conn cfg'
+
+prependHash :: Text -> Text
+prependHash s | T.isPrefixOf "#" s = s
+              | otherwise = T.cons '#' s
+
 
 logEventsHandler :: EventHandler
 logEventsHandler = EventHandler "Trace chat events" EEverything logEvent 
