@@ -30,9 +30,10 @@ main = do
   hSetBuffering stdout NoBuffering
   let host = "chat.freenode.net" 
   let port = 6667
-  conn <- connect' stdoutLogger host port 1
+  -- noopLogger, stdoutLogger
+  conn <- connect' noopLogger host port 1
   let cfg = defaultIRCConf nickname
-  let hs = [joinChatHandler chatroom]
+  let hs = [joinChatHandler chatroom, messageHandler]
   -- let hs = [joinChatHandler chatroom, logEventsHandler]
   let cfg' = cfg { _eventHandlers = hs ++ _eventHandlers cfg }
   start conn cfg'
@@ -44,6 +45,10 @@ prependHash s | T.isPrefixOf "#" s = s
 
 logEventsHandler :: EventHandler
 logEventsHandler = EventHandler "Trace chat events" EEverything logEvent 
+
+messageHandler :: EventHandler
+messageHandler = EventHandler "Log messages" EPrivmsg logMessage
+
 
 logEvent :: UnicodeEvent -> IRC ()
 logEvent ev = do
@@ -61,7 +66,17 @@ joinChat ch ev =
     Numeric 001 _ -> send (Join ch)
     _ -> return ()
 
+logMessage :: UnicodeEvent -> IRC ()
+logMessage ev = 
+  case _message ev of
+    Privmsg x y -> liftIO $ do
+        print (_source ev)
+        print x
+        print y
+        putStrLn "---"
 
+    _ -> return ()
+    
 
 {-
 send :: UnicodeMessage -> IRC ()
