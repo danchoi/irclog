@@ -9,6 +9,7 @@ import Control.Applicative
 import Data.Text (Text)
 import qualified Data.Text as T
 import Control.Monad.IO.Class
+import System.IO 
 
 data Options = Options {
         nickname :: Text 
@@ -26,6 +27,7 @@ opts = info (helper <*> parseOpts)
 main = do
   opt@Options{..} <- execParser opts
   print opt
+  hSetBuffering stdout NoBuffering
   let host = "chat.freenode.net" 
   let port = 6667
   conn <- connect' stdoutLogger host port 1
