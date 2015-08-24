@@ -8,8 +8,13 @@ import Options.Applicative
 import Control.Applicative
 import Data.Text (Text)
 import qualified Data.Text as T
+import qualified Data.Text.IO as T
 import Control.Monad.IO.Class
 import System.IO 
+import Data.Time.Clock            (NominalDiffTime, getCurrentTime)
+import Data.Time.Format           (formatTime)
+import System.Locale    (defaultTimeLocale)
+import Text.Printf
 
 data Options = Options {
         nickname :: Text 
@@ -69,14 +74,36 @@ joinChat ch ev =
 logMessage :: UnicodeEvent -> IRC ()
 logMessage ev = 
   case _message ev of
-    Privmsg x y -> liftIO $ do
-        print (_source ev)
-        print x
-        print y
-        putStrLn "---"
+    Privmsg target m -> liftIO $ do
+        now <- getCurrentTime
+        let ts =  formatTime defaultTimeLocale "%c" now
+
+        let source = T.unpack $ formatSource (_source ev)
+        printf "%s %20s : " ts source 
+        -- print target
+        T.putStrLn (formatMsg m)
 
     _ -> return ()
     
+formatSource :: Source Text -> Text
+formatSource (Channel name nick) = nick
+formatSource (User nick) = nick
+formatSource (Server n) = n
+
+formatMsg :: Either b Text -> Text
+formatMsg (Right m) = m
+formatMsg (Left e) = "CTCPByteString"
+{-
+Channel "#haskell" "Welkin"
+"#haskell"
+Right "I know"
+---
+Channel "#haskell" "quchen"
+"#haskell"
+Right "But your deps lack that."
+---
+
+-}
 
 {-
 send :: UnicodeMessage -> IRC ()

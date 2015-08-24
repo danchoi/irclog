@@ -24,5 +24,7 @@ executable irclog
                      , optparse-applicative
                      , text
                      , transformers
+                     , time == 1.4.2
+                     , old-locale
   -- hs-source-dirs:      
   default-language:    Haskell2010
