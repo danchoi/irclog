@@ -9,16 +9,19 @@ import Control.Applicative
 import Data.Text (Text)
 import qualified Data.Text as T
 import Control.Monad.IO.Class
+import System.IO
 
 data Options = Options {
         nickname :: Text 
       , chatroom :: Text 
+      , logFile :: FilePath   -- "-" for stdout
       } deriving Show
 
 parseOpts :: Parser Options
 parseOpts = Options   
         <$> (T.pack <$> strArgument (metavar "NICK" <> help "Nickname"))
         <*> (prependHash . T.pack <$> strArgument (metavar "CHANNEL" <> help "Channel, # is automatically prepended if missing"))
+        <*> strArgument (metavar "LOGFILE" <> help "Use - for stdout")
 
 opts = info (helper <*> parseOpts)
          (fullDesc <> header "irclog")
@@ -28,7 +31,8 @@ main = do
   print opt
   let host = "chat.freenode.net" 
   let port = 6667
-  conn <- connect' stdoutLogger host port 1
+  let out = if logFile == "-" then stdoutLogger else fileLogger logFile
+  conn <- connect' out host port 1
   let cfg = defaultIRCConf nickname
   let hs = [joinChatHandler chatroom]
   -- let hs = [joinChatHandler chatroom, logEventsHandler]
