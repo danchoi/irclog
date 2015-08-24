@@ -21,7 +21,7 @@ parseOpts = Options
         <*> (prependHash . T.pack <$> strArgument (metavar "CHANNEL" <> help "Channel, # is automatically prepended if missing"))
 
 opts = info (helper <*> parseOpts)
-         (fullDesc <> header "bhirc")
+         (fullDesc <> header "irclog")
 
 main = do
   opt@Options{..} <- execParser opts
